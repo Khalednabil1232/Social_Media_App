@@ -16,6 +16,13 @@ export interface IsignupType  {
     address?:string
 }
 
+export interface IsignInWithGemailTypes  {
+    email: string,
+    name:string,
+    email_verified:boolean,
+    picture:string
+    
+}
 
 //-------------signIn-------------//      
 

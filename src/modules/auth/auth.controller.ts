@@ -7,6 +7,7 @@ import { authentication } from "../../common/middleware/authentication";
 
 const authRouter = Router()
 
+authRouter.post("/signUp/gmail" , AS.signUpWithGmail)
 authRouter.post("/signUp" ,validation(AV.signUpSchema), AS.signUp )
 authRouter.post("/confirmeEmail" ,validation(AV.confirmeEmailSchema), AS.confirmeEmail )
 authRouter.post("/resendOtp" ,validation(AV.resendOtpSchema), AS.resendOtp )

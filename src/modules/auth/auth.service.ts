@@ -2,11 +2,11 @@
 import type { NextFunction , Request , Response } from "express"
 import successResponse from "../../common/utils/success_respons/success.respons"
 import  { Iuser } from "../../DB/models/user.model"
-import { IsignupType, confirmeEmailDto, resendOtpDto, signInDto, update_PasswordDto, resetPasswordDto, forgetPasswordDto, forgetPasswordLinkDot, resetPasswordLinkDot } from './auth.dto';
+import { IsignupType, confirmeEmailDto, resendOtpDto, signInDto, update_PasswordDto, resetPasswordDto, forgetPasswordDto, forgetPasswordLinkDot, resetPasswordLinkDot, IsignInWithGemailTypes } from './auth.dto';
 import { compare_password, hash_password } from "../../common/utils/security/hash_password"
 import { HydratedDocument } from "mongoose"
 import { AppError } from "../../common/utils/global-error/global-error-handler"
-import { providerEnum } from "../../common/enum/user.enum"
+import { providerEnum, RoleEnum } from "../../common/enum/user.enum"
 import UserRepository from "../../DB/repositories/user.repository"
 import { encrypt } from "../../common/utils/security/encrypt.security"
 import { genrateOtp, sendEmail } from "../../common/utils/email/send.email"
@@ -15,8 +15,9 @@ import { eventEmitter } from "../../common/utils/email/email.events"
 import { EventEnum } from "../../common/enum/event.enum"
 import RedisService from "../../common/service/redis.service";
 import { randomUUID} from "crypto";
-import { ACCESS_SEUCRIT_KEY, REFRESH_SEUCRIT_KEY } from "../../config/config.service";
 import TokenService from "../../common/utils/token/token.service";
+import {OAuth2Client}  from'google-auth-library';
+import { ACCESS_SEUCRIT_KEY_ADMIN, ACCESS_SEUCRIT_KEY_USER, CLIENT_ID, REFRESH_SEUCRIT_KEY_ADMIN, REFRESH_SEUCRIT_KEY_USER } from "../../config/config.service";
 
 
 
@@ -101,6 +102,77 @@ sendEmailOtp = async ({
     });
 };
 
+signUpWithGmail = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const { idToken }: { idToken: string } = req.body;
+
+    const client = new OAuth2Client();
+
+    const ticket = await client.verifyIdToken({
+        idToken,
+        audience:CLIENT_ID!
+    });
+
+    const payload = ticket.getPayload();
+
+    if (!payload) {
+        throw new AppError("invalid google token");
+    }
+
+    const {
+        email,
+        name,
+        email_verified,
+        picture
+    }: IsignInWithGemailTypes = payload as IsignInWithGemailTypes;
+
+    if (!email) {
+        throw new AppError("email not found");
+    }
+
+    let user = await this._userModel.findOne({
+        filter: { email }
+    });
+
+    if (!user) {
+        user = await this._userModel.create({
+            email,
+            userName: name,
+            confirmEmail: email_verified,
+            provider: providerEnum.google,
+            profilePicture: {
+                secure_url: picture,
+                public_id: ""
+            }
+        });
+    }
+
+    if (user.provider === providerEnum.system) {
+        throw new AppError(
+            "user signed up with system, use email/password"
+        );
+    }
+
+    const access_token = this._tokenService.generateToken({
+        paylod: {
+            userId: user._id,
+            role: user.role
+        },
+        seucrit: ACCESS_SEUCRIT_KEY_USER!,
+        options: {
+            expiresIn: "2h"
+        }
+    });
+
+    successResponse({
+        res,
+        message: "login success",
+        data: { access_token }
+    });
+};
 
     signUp = async(req: Request , res : Response , next : NextFunction)=>
 {
@@ -200,7 +272,7 @@ sendEmailOtp = async ({
 }
 
     
-    signIn = async (req: Request , res : Response , next : NextFunction)=>
+signIn = async (req: Request , res : Response , next : NextFunction)=>
 {
     const { email , password}:signInDto = req.body
     const user = await this._userModel.findOne({ filter:{email ,
@@ -219,7 +291,7 @@ sendEmailOtp = async ({
 
     const jwtid = randomUUID()
     const access_token = this._tokenService.generateToken({paylod:{userId : user._id} , 
-        seucrit:ACCESS_SEUCRIT_KEY!,
+        seucrit:user?.role==RoleEnum.user?ACCESS_SEUCRIT_KEY_USER!:ACCESS_SEUCRIT_KEY_ADMIN!,
         options:{
             expiresIn : 60 * 3 ,
             issuer:"http://localhost:3001",
@@ -228,7 +300,7 @@ sendEmailOtp = async ({
     }})
 
     const refresh_token = this._tokenService.generateToken({paylod:{userId:user._id},
-        seucrit:REFRESH_SEUCRIT_KEY!,
+        seucrit:user?.role==RoleEnum.user?REFRESH_SEUCRIT_KEY_USER!:REFRESH_SEUCRIT_KEY_ADMIN!,
         options:{
             expiresIn:"1y",
             jwtid
@@ -355,7 +427,7 @@ sendEmailOtp = async ({
 
     const token = this._tokenService.generateToken({
         paylod:{ email },
-        seucrit:ACCESS_SEUCRIT_KEY!,
+        seucrit:user?.role==RoleEnum.user?ACCESS_SEUCRIT_KEY_USER!:ACCESS_SEUCRIT_KEY_ADMIN!,
         options:{
             expiresIn:"10m"
         }
@@ -384,7 +456,7 @@ resetPasswordLink = async (req: Request, res: Response, next: NextFunction) => {
 
     const decoded = this._tokenService.verifyToken({
         token,
-        seucrit: ACCESS_SEUCRIT_KEY!
+        seucrit:ACCESS_SEUCRIT_KEY_USER!,
     });
 
     if (!decoded?.email) {

@@ -9,13 +9,13 @@ import  { AppError, error_handler } from "./common/utils/global-error/global-err
 import checkConnectionDB from "./DB/connectionDB"
 import authRouter from "./modules/auth/auth.controller"
 import redisService from "./common/service/redis.service"
+import userModel from "./DB/models/user.model"
 
 const app:express.Application = express()
 const port:number = Number(PORT)
 
 const boootstrap = async ()=>
 {
-
     const limiter = rateLimit({
         windowMs:60 * 5 * 1000,
         limit:20,
@@ -51,8 +51,39 @@ origin: function (origin:any, callback:any) {
     
 
     app.get("/", (req: Request, res: Response, next: NextFunction) => {
-        successResponse({ res, data: "welcome to social media app..👻❤"  , status:201 , message: "doone"})
+        successResponse({ res, data: "welcome to social media app..💬❤️"  , status:201 , message: "doone"})
     })
+
+
+
+    // async function test(){
+    //     const user = new userModel({
+    //         userName:"khaled Nabil",
+    //         email:`khaled${Date.now()}@gmail.com`,
+    //         password:"12345678",
+    //         age:25,
+    //     })
+    //     await user.save({validateBeforeSave:true})
+    //     user.age = 25
+    //     user.password = "552004"
+    //     await user.save()
+    //     console.log("user created");
+        
+    // }
+
+    // test()
+
+    // async function test(){
+    //     const user = new userModel({
+    //         firstName:"khaled",
+    //         email:`khaled${Date.now()}@gmail.com`,
+    //         age:20
+    //     })
+    //     await user.updateOne({age:25})
+    //     console.log("user updated");
+    // }
+    // test()
+    
 
     app.use("/auth" , authRouter)
 
@@ -65,7 +96,7 @@ origin: function (origin:any, callback:any) {
 
     app.listen(port , ()=>
     {
-        console.log(`Server is running on port ${port}......👻`);
+        console.log(`Server is running on port ${port}......⏳✅`);
     })
 
 }

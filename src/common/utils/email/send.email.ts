@@ -24,7 +24,7 @@ tls: {
 
 
 const info = await transporter.sendMail({
-    from: `"Ashraff👻"<${EMAIL}>`,
+    from: `"khaled"<${EMAIL}>`,
     ...mailOptions
 });
 

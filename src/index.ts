@@ -1,3 +1,3 @@
-import boootstrap from "./app.controller";
+import bootstrap from "./app.controller";
 
-boootstrap()
+bootstrap()

@@ -1,5 +1,6 @@
 import mongoose, { Types } from "mongoose";
-import { GenderEnum, RoleEnum } from "../../common/enum/user.enum";
+import { GenderEnum, providerEnum, RoleEnum } from "../../common/enum/user.enum";
+import { hash_password } from "../../common/utils/security/hash_password";
 
 
 
@@ -20,6 +21,12 @@ export interface Iuser
     confirmEmail?:boolean,
     createdAt:Date,
     updatedAt:Date,
+    profilePicture?: {
+        secure_url?: string;
+        public_id?: string;
+    },
+    provider?:providerEnum,
+    
     changeCredential?: Date;
 
     
@@ -49,11 +56,13 @@ const userSchema = new mongoose.Schema<Iuser>(
         required: true
     },
     password: {
-        type: String,
-        required: true,
-        min:3,
-        max:20
-    },
+            type: String,
+            required: function () {
+                return this.provider !== providerEnum.google;
+            },
+            trim: true,
+            minlength: 7
+        },
     age:{
         type:Number,
         min:18,
@@ -75,12 +84,17 @@ const userSchema = new mongoose.Schema<Iuser>(
         trim:true
         
     },
+
     role:{
         type:String,
         enum:RoleEnum,
         default:RoleEnum.user
         
     },
+    profilePicture: {
+            secure_url: { type: String, default: null },
+            public_id: { type: String, default: null }
+        },
     confirmEmail:Boolean
     },
     {
@@ -100,6 +114,49 @@ userSchema.virtual("userName")
     this.firstName = v.split(" ")[0]
     this.lastName = v.split(" ")[1]
 })
+
+// userSchema.pre("save" , function()
+// {
+//     console.log("....pre save hook is running.....");
+//     console.log(this);
+//     this.password = hash_password({myPlaintextPassword:this.password})
+// })
+
+// userSchema.post("save" , function ()
+// {
+//     console.log("...............post hook2...........");
+//     console.log(this);
+    
+// })
+
+// userSchema.pre("validate" , function ()
+// {
+//     console.log("...............pre validate hook1.............");
+//     console.log(this);
+
+//     if((this.age! <20))
+//     {
+//         throw new AppError("age is to small")
+        
+//     }
+    
+    
+// })
+
+// userSchema.post("validate" , function ()
+// {
+//     console.log("...............post validate hook2...........");
+//     console.log(this);
+    
+// })
+
+// userSchema.pre("save" , function (this:HydratedDocument<Iuser>&{is_new : boolean})
+// {
+//     console.log("...............pre hook1.............");
+//     console.log(this);
+//     this.is_new = this.isNew
+//     if(this.isModified("password"))
+
 const userModel = mongoose.models.user || mongoose.model<Iuser>("user" , userSchema)
 
 export default userModel

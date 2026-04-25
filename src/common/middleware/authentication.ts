@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/global-error/global-error-handler.js";
-import { ACCESS_SEUCRIT_KEY, PERFIX } from "../../config/config.service.js";
+import { PERFIX_USER , PERFIX_ADMIN, ACCESS_SEUCRIT_KEY_USER, ACCESS_SEUCRIT_KEY_ADMIN } from "../../config/config.service.js";
 import tokenService from "../utils/token/token.service.js";
 import RedisService from "../service/redis.service.js";
 import UserRepository from "../../DB/repositories/user.repository.js";
@@ -17,17 +17,27 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
         
         const [perfix, token]: string[] = (auth as string).split(" ");
 
-        if (perfix !== PERFIX) {
-            throw new AppError("invalid token prefix", 403);
-        }
 
         if (!token) {
             throw new AppError("token not found", 403);
         }
 
+        let ACCESS_SEUCRIT_KEY = "";
+
+        if(perfix == PERFIX_USER)
+        {
+            ACCESS_SEUCRIT_KEY = ACCESS_SEUCRIT_KEY_USER!
+        }else if(perfix == PERFIX_ADMIN)
+        {
+            ACCESS_SEUCRIT_KEY = ACCESS_SEUCRIT_KEY_ADMIN!
+        }else
+        {
+            throw new AppError("invalid token prefix", 403);
+        }
+
         const decoded = tokenService.verifyToken({
             token,
-            seucrit: ACCESS_SEUCRIT_KEY!
+            seucrit: ACCESS_SEUCRIT_KEY
         });
 
         if (!decoded || !decoded.userId) {
