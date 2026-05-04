@@ -1,0 +1,19 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.error_handler = exports.AppError = void 0;
+class AppError extends Error {
+    message;
+    statusCode;
+    constructor(message, statusCode = 500) {
+        super(message);
+        this.message = message;
+        this.statusCode = statusCode;
+        this.message = message;
+        this.statusCode = statusCode;
+    }
+}
+exports.AppError = AppError;
+exports.error_handler = ((err, req, res, next) => {
+    const status = err.statusCode || 500;
+    res.status(status).json({ message: err.message, status, stack: err.stack });
+});
