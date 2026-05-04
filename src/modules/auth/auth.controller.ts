@@ -3,6 +3,8 @@ import  AS from "./auth.service"
 import * as  AV from "./auth.validation"
 import { validation } from "../../common/middleware/validation";
 import { authentication } from "../../common/middleware/authentication";
+import multerCloud from "../../common/middleware/multer.cloud";
+import { Store_Enum } from "../../common/enum/multer.enum";
 
 
 const authRouter = Router()
@@ -20,6 +22,10 @@ authRouter.patch("/forget-password-Link", validation(AV.forgetPasswordLinkSchema
 authRouter.patch("/reset-password-Link/:token", validation(AV.resetPasswordLinkSchema),AS.resetPasswordLink)
 //
 authRouter.post("/logout"  , authentication, AS.logout )
+
+// authRouter.post("/upload",multerCloud().single("attachment"),AS.uploadImage )
+
+authRouter.post("/uploadLargeFile",multerCloud({store_type:Store_Enum.disk}).single("attachment"),AS.uploadImage )
 
 
 

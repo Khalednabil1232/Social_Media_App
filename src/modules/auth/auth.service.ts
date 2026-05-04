@@ -18,6 +18,8 @@ import { randomUUID} from "crypto";
 import TokenService from "../../common/utils/token/token.service";
 import {OAuth2Client}  from'google-auth-library';
 import { ACCESS_SEUCRIT_KEY_ADMIN, ACCESS_SEUCRIT_KEY_USER, CLIENT_ID, REFRESH_SEUCRIT_KEY_ADMIN, REFRESH_SEUCRIT_KEY_USER } from "../../config/config.service";
+import { S3 } from "@aws-sdk/client-s3";
+import { S3Service } from "../../common/service/s3.service";
 
 
 
@@ -29,6 +31,8 @@ class UserServies {
     private readonly _userModel = new UserRepository()
     private readonly _redisService =  RedisService
     private readonly _tokenService =  TokenService
+    private readonly _s3Service =  new S3Service();
+
 
     constructor() {}
 
@@ -499,6 +503,20 @@ resetPasswordLink = async (req: Request, res: Response, next: NextFunction) => {
         message: "password updated"
     });
 }
+
+
+    uploadImage = async (req: Request , res : Response , next : NextFunction)=>
+{
+        const{fileName , ContentType}= req.body
+        const {url , Key} = await this._s3Service.createPresigneUrl(
+        {
+            fileName,
+            ContentType,
+            path:`users/${req.user._id}`
+        }
+    )
+}
+
 }
 
 export default new UserServies()
