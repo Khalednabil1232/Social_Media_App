@@ -15,6 +15,7 @@ const auth_controller_1 = __importDefault(require("./modules/auth/auth.controlle
 const redis_service_1 = __importDefault(require("./common/service/redis.service"));
 const s3_service_1 = require("./common/service/s3.service");
 const promises_1 = require("stream/promises");
+const notification_service_1 = __importDefault(require("./common/service/notification.service"));
 const app = (0, express_1.default)();
 const port = Number(config_service_1.PORT);
 const boootstrap = async () => {
@@ -45,6 +46,16 @@ const boootstrap = async () => {
     await redis_service_1.default.connect();
     app.get("/", (req, res, next) => {
         (0, success_respons_1.default)({ res, data: "welcome to social media app..💬❤️", status: 201, message: "doone" });
+    });
+    app.post("/send-notification", async (req, res, next) => {
+        await notification_service_1.default.sendNotification({
+            token: req.body.token,
+            data: {
+                title: "Hello from social media app",
+                body: "This is a test notification sent from the social media app."
+            }
+        });
+        console.log({ token: req.body.token });
     });
     app.get("/upload", async (req, res, next) => {
         const { folderName } = req.query;

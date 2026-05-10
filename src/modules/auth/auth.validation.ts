@@ -54,6 +54,7 @@ export const signInSchema:any = {
     body:z.strictObject({
     password: z.string().min(6).max(25).optional(),
     email: z.string().email(),
+    fcm: z.string(),
 })}
 
 export const update_PasswordSchema: any = {

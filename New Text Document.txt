@@ -1,0 +1,40 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBluhluKmbtlC6sMk6Z_Bl89sdhbI3i7ls",
+  authDomain: "social-media-online.firebaseapp.com",
+  projectId: "social-media-online",
+  storageBucket: "social-media-online.firebasestorage.app",
+  messagingSenderId: "284324240775",
+  appId: "1:284324240775:web:55dbae496950c289240722",
+  measurementId: "G-7M538PZHKT"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BFTaIgZRKe2su8RAzxtYozzKNrKvUjZKQFWbxFW8vHKWkV0U9RQ-jOQnZc1F2sl9FcAvxuaegrR-dTYFhdl77IM
+

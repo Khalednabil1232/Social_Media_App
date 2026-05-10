@@ -62,7 +62,8 @@ const userSchema = new mongoose_1.default.Schema({
         secure_url: { type: String, default: null },
         public_id: { type: String, default: null }
     },
-    confirmEmail: Boolean
+    confirmEmail: Boolean,
+    friends: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" }],
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

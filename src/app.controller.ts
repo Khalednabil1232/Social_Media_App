@@ -12,6 +12,8 @@ import redisService from "./common/service/redis.service"
 import userModel from "./DB/models/user.model"
 import { S3Service } from "./common/service/s3.service"
 import { pipeline } from "stream/promises"
+import NotificationService from "./common/service/notification.service"
+
 
 const app:express.Application = express()
 const port:number = Number(PORT)
@@ -54,6 +56,21 @@ origin: function (origin:any, callback:any) {
 
     app.get("/", (req: Request, res: Response, next: NextFunction) => {
         successResponse({ res, data: "welcome to social media app..💬❤️"  , status:201 , message: "doone"})
+    })
+
+
+
+    app.post("/send-notification", async (req: Request, res: Response, next: NextFunction) => {
+
+        await NotificationService.sendNotification({
+            token:req.body.token,
+            data:{ 
+                title:"Hello from social media app",
+                body:"This is a test notification sent from the social media app."}
+        })
+        console.log({token:req.body.token});
+        
+
     })
 
 

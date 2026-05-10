@@ -19,9 +19,11 @@ const token_service_1 = __importDefault(require("../../common/utils/token/token.
 const google_auth_library_1 = require("google-auth-library");
 const config_service_1 = require("../../config/config.service");
 const s3_service_1 = require("../../common/service/s3.service");
+const notification_service_1 = __importDefault(require("../../common/service/notification.service"));
 class UserServies {
     _userModel = new user_repository_1.default();
     _redisService = redis_service_1.default;
+    notificationService = notification_service_1.default;
     _tokenService = token_service_1.default;
     _s3Service = new s3_service_1.S3Service();
     constructor() { }
@@ -180,7 +182,7 @@ class UserServies {
         (0, success_respons_1.default)({ res, message: "email confirmEmail successfuiiy" });
     };
     signIn = async (req, res, next) => {
-        const { email, password } = req.body;
+        const { email, password, fcm } = req.body;
         const user = await this._userModel.findOne({ filter: { email,
                 provider: user_enum_1.providerEnum.system,
                 confirmEmail: { $exists: true }
@@ -206,6 +208,17 @@ class UserServies {
                 expiresIn: "1y",
                 jwtid
             } });
+        if (fcm) {
+            await this._redisService.addFCM({ userId: user._id, FCMToken: fcm });
+            const tokens = await this._redisService.getFCMs({ userId: user._id });
+            await this.notificationService.sendNotifications({
+                tokens,
+                data: {
+                    title: `hi ${user.userName}`,
+                    body: "You have successfully logged in to your account."
+                }
+            });
+        }
         (0, success_respons_1.default)({ res, data: { access_token, refresh_token } });
     };
     getProfile = async (req, res, next) => {

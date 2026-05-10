@@ -73,6 +73,7 @@ exports.signInSchema = {
     body: z.strictObject({
         password: z.string().min(6).max(25).optional(),
         email: z.string().email(),
+        fcm: z.string(),
     })
 };
 exports.update_PasswordSchema = {

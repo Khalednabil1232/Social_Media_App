@@ -26,6 +26,7 @@ export interface Iuser
         secure_url?: string;
         public_id?: string;
     },
+    friends?: Types.ObjectId[],
     provider?:providerEnum,
     
     changeCredential?: Date;
@@ -97,7 +98,8 @@ const userSchema = new mongoose.Schema<Iuser>(
             secure_url: { type: String, default: null },
             public_id: { type: String, default: null }
         },
-    confirmEmail:Boolean
+    confirmEmail:Boolean,
+    friends:[{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     },
     {
         timestamps: true,
