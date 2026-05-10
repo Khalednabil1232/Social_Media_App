@@ -3,5 +3,5 @@ node_modules
 .env.development
 .env.production
 package-lock.json
-*.json
 dist
+src/config/*firebase*.json
